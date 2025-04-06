@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Route Map</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 100vh; }
+    .info-box {
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    // Paste your coordinates from Make.com output here (from routes[0].geometry.coordinates)
+    const routeCoords = [
+      [77.1025, 28.7041],  // Start: Delhi
+      [77.0, 28.5],
+      [76.5, 26.2],
+      [75.8577, 22.7196]   // End: Indore
+    ];
+
+    // Example distance & duration from Make.com response (routes[0].summary)
+    const totalDistance = 790.4;  // in km
+    const totalDuration = 570;    // in minutes
+
+    const latLngs = routeCoords.map(coord => [coord[1], coord[0]]); // Convert to [lat, lng]
+    const map = L.map('map').setView(latLngs[0], 6);  // Start view at first point
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Draw the route
+    const routeLine = L.polyline(latLngs, { color: 'blue' }).addTo(map);
+    map.fitBounds(routeLine.getBounds());
+
+    // Start marker
+    L.marker(latLngs[0]).addTo(map).bindPopup("Start: Delhi").openPopup();
+
+    // End marker
+    L.marker(latLngs[latLngs.length - 1]).addTo(map).bindPopup("End: Indore");
+
+    // Distance & duration box
+    const infoBox = L.control();
+
+    infoBox.onAdd = function () {
+      const div = L.DomUtil.create('div', 'info-box');
+      div.innerHTML = `
+        <strong>Route Summary</strong><br>
+        Distance: ${totalDistance} km<br>
+        Duration: ${Math.round(totalDuration)} mins
+      `;
+      return div;
+    };
+
+    infoBox.addTo(map);
+  </script>
+</body>
+</html>
